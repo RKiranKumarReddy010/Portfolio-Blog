@@ -1,41 +1,59 @@
-import { Card } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { ArrowRight } from "lucide-react"
-import Link from "next/link"
+"use client";
 
-const projects = [
-  {
-    id: 1,
-    title: "E-commerce Platform",
-    description: "A full-featured e-commerce platform built with Next.js and Stripe",
-    technologies: ["Next.js", "TypeScript", "Tailwind CSS", "Stripe"],
-    image: "https://images.unsplash.com/photo-1472851294608-062f824d29cc?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    id: 2,
-    title: "Task Management App",
-    description: "A collaborative task management application with real-time updates",
-    technologies: ["React", "Node.js", "Socket.io", "PostgreSQL"],
-    image: "https://images.unsplash.com/photo-1484480974693-6ca0a78fb36b?auto=format&fit=crop&q=80&w=800",
-  },
-  {
-    id: 3,
-    title: "Portfolio Website",
-    description: "A modern portfolio website built with Next.js and Tailwind CSS",
-    technologies: ["Next.js", "Tailwind CSS", "TypeScript"],
-    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=800",
-  },
-]
+import { useEffect, useState } from "react";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { initializeApp, getApps } from "firebase/app";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+// Initialize Firebase
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+const db = getFirestore();
 
 export default function ProjectsPage() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "projects"));
+        const projectsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setProjects(projectsData);
+      } catch (error) {
+        console.error("Error fetching projects:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  if (loading) return <p>Loading projects...</p>;
+
   return (
     <div className="container py-8" style={{padding:10}}>
-      <div className="flex flex-col items-start gap-4">
-        <h1 className="font-heading text-3xl md:text-4xl">Projects</h1>
-        <p className="text-lg text-muted-foreground">
-          A collection of my recent work and side projects.
+      <h1 className="ffont-heading text-3xl md:text-4xl">Projects</h1>
+      <p className="text-lg text-muted-foreground">
+      Here are some of my projects. Check out my github for more project info.
         </p>
-      </div>
       <div className="grid gap-6 pt-8 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
           <Card key={project.id} className="overflow-hidden">
@@ -56,16 +74,27 @@ export default function ProjectsPage() {
                   </Badge>
                 ))}
               </div>
-              <Link
-                href={`/projects/${project.id}`}
-                className="inline-flex items-center mt-4 text-sm font-medium text-primary hover:underline"
-              >
-                View Project <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
+              {project.link ? (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center mt-4 text-sm font-medium text-primary hover:underline"
+                >
+                  Visit Project <ArrowRight className="ml-1 h-4 w-4" />
+                </a>
+              ) : (
+                <Link
+                  href={`/projects/${project.id}`}
+                  className="inline-flex items-center mt-4 text-sm font-medium text-primary hover:underline"
+                >
+                  View Details <ArrowRight className="ml-1 h-4 w-4" />
+                </Link>
+              )}
             </div>
           </Card>
         ))}
       </div>
     </div>
-  )
+  );
 }

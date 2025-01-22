@@ -49,17 +49,31 @@ export default function AboutPage() {
           <h2 className="font-heading text-xl mt-8 mb-4">Experience</h2>
           <div className="space-y-4">
             <div>
-              <h3 className="font-medium">Senior Developer - Tech Corp</h3>
-              <p className="text-sm text-muted-foreground">2020 - Present</p>
+              <h3 className="font-medium">Machine Learning Intern (Yhills) </h3>
+              <p className="text-sm text-muted-foreground">2024 (Jan) - 2024 (Apr)</p>
               <p className="mt-2">
-                Led development of multiple full-stack applications using React and Node.js.
+                Led development of realtime Machine learning apps using python.
               </p>
             </div>
             <div>
-              <h3 className="font-medium">Full Stack Developer - StartUp Inc</h3>
-              <p className="text-sm text-muted-foreground">2018 - 2020</p>
+              <h3 className="font-medium">Machine Learning Intern (GIETU) </h3>
+              <p className="text-sm text-muted-foreground">2024 (June) - 2024 (Aug)</p>
               <p className="mt-2">
-                Developed and maintained various web applications using modern technologies.
+                Developed and maintained machine learning project and developed a python module.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-medium">Cyber Security Intern (CyebrYaan) </h3>
+              <p className="text-sm text-muted-foreground">2023 (June) - 2024 (Aug)</p>
+              <p className="mt-2">
+                Cyber Security Application with Web Exploitation.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-medium">(GDG) Machine Learning Lead</h3>
+              <p className="text-sm text-muted-foreground">2024 (Sept) - current</p>
+              <p className="mt-2">
+                Leading the Machine learning Domain by conducting workshops, events and all.
               </p>
             </div>
           </div>

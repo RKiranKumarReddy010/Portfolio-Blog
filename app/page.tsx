@@ -1,11 +1,50 @@
-import { Button } from "@/components/ui/button"
-import { Card } from "@/components/ui/card"
-import { ArrowRight, Github, Instagram, Linkedin } from "lucide-react"
-import Image from "next/image"
-import Link from "next/link"
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { ArrowRight, Github, Instagram, Linkedin } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export default function Home() {
-  
+  const [posts, setPosts] = useState([]);
+  const [projects, setProjects] = useState([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const postsSnapshot = await getDocs(collection(db, "posts"));
+      const postsData = postsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const projectsSnapshot = await getDocs(collection(db, "projects"));
+      const projectsData = projectsSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setPosts(postsData.slice(0, 2)); // Limit to 2 blogs
+      setProjects(projectsData.slice(0, 3)); // Limit to 3 projects
+    };
+
+    fetchData();
+  }, []);
+
   return (
     <div className="flex flex-col items-center justify-center" style={{ margin: 2 }}>
       <section className="space-y-8 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
@@ -26,27 +65,26 @@ export default function Home() {
             </Button>
           </div>
           <div className="flex gap-6">
-            <Link href="https://github.com/RKiranKumarReddy010" target="_blank" rel="noreferrer">
-              <Button variant="ghost" size="icon" className="h-12 w-12" style={{ color: "red" }}>
+            <Link href="https://github.com/RKiranKumarReddy010" target="_blank" rel="noreferrer" style={{ color: "red" }}>
+              <Button variant="ghost" size="icon" className="h-12 w-12">
                 <Github className="h-6 w-6" />
                 <span className="sr-only">GitHub</span>
               </Button>
             </Link>
-            <Link href="https://www.instagram.com/kir4n_kum4r_/" target="_blank" rel="noreferrer">
-              <Button variant="ghost" size="icon" className="h-12 w-12" style={{ color: "red" }}>
+            <Link href="https://www.instagram.com/kir4n_kum4r_/" target="_blank" rel="noreferrer" style={{ color: "red" }}>
+              <Button variant="ghost" size="icon" className="h-12 w-12">
                 <Instagram className="h-6 w-6" />
                 <span className="sr-only">Instagram</span>
               </Button>
             </Link>
-            <Link href="https://www.linkedin.com/in/r-kiran-kumar-reddy-54400230b/" target="_blank" rel="noreferrer">
-              <Button variant="ghost" size="icon" className="h-12 w-12" style={{ color: "red" }}>
+            <Link href="https://www.linkedin.com/in/r-kiran-kumar-reddy-54400230b/" target="_blank" rel="noreferrer" style={{ color: "red" }}>
+              <Button variant="ghost" size="icon" className="h-12 w-12">
                 <Linkedin className="h-6 w-6" />
                 <span className="sr-only">LinkedIn</span>
               </Button>
             </Link>
           </div>
         </div>
-
       </section>
 
       <section className="container space-y-8 py-8 md:py-12 lg:py-24 bg-muted/50">
@@ -59,16 +97,14 @@ export default function Home() {
           </p>
         </div>
         <div className="mx-auto grid justify-center gap-6 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow">
+          {projects.map((project) => (
+            <Card key={project.id} className="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow">
               <div>
-                <h3 className="font-heading text-xl font-semibold">Project {i}</h3>
-                <p className="mt-2 text-muted-foreground">
-                  A brief description of project {i} and what technologies were used.
-                </p>
+                <h3 className="font-heading text-xl font-semibold">{project.title}</h3>
+                <p className="mt-2 text-muted-foreground">{project.description}</p>
               </div>
               <Button variant="ghost" className="mt-6" asChild>
-                <Link href={`/projects/${i}`}>
+                <Link href={`/projects/${project.id}`}>
                   Learn more <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -87,17 +123,17 @@ export default function Home() {
           </p>
         </div>
         <div className="mx-auto grid justify-center gap-6 sm:grid-cols-2 md:max-w-[64rem]">
-          {[1, 2].map((i) => (
-            <Card key={i} className="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow">
+          {posts.map((post) => (
+            <Card key={post.id} className="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow">
               <div>
-                <p className="text-sm text-muted-foreground">January {i}, 2024</p>
-                <h3 className="font-heading text-xl mt-2 font-semibold">Blog Post {i}</h3>
-                <p className="mt-2 text-muted-foreground">
-                  A brief preview of blog post {i} content goes here...
+                <p className="text-sm text-muted-foreground">
+                  {new Date(post.date).toLocaleDateString()}
                 </p>
+                <h3 className="font-heading text-xl mt-2 font-semibold">{post.title}</h3>
+                <p className="mt-2 text-muted-foreground">{post.excerpt}</p>
               </div>
               <Button variant="ghost" className="mt-6" asChild>
-                <Link href={`/blog/${i}`}>
+                <Link href={post.link || `/blog/${post.id}`}>
                   Read more <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
@@ -106,5 +142,5 @@ export default function Home() {
         </div>
       </section>
     </div>
-  )
+  );
 }
