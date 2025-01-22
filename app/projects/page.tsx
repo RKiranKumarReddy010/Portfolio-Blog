@@ -23,8 +23,18 @@ if (!getApps().length) {
 }
 const db = getFirestore();
 
+// Define project type
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+  image?: string;
+  technologies: string[];
+  link?: string;
+}
+
 export default function ProjectsPage() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,7 +44,7 @@ export default function ProjectsPage() {
         const projectsData = querySnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
-        }));
+        })) as Project[];
         setProjects(projectsData);
       } catch (error) {
         console.error("Error fetching projects:", error);
@@ -49,17 +59,17 @@ export default function ProjectsPage() {
   if (loading) return <p>Loading projects...</p>;
 
   return (
-    <div className="container py-8" style={{padding:10}}>
-      <h1 className="ffont-heading text-3xl md:text-4xl">Projects</h1>
+    <div className="container py-8" style={{ padding: 10 }}>
+      <h1 className="font-heading text-3xl md:text-4xl">Projects</h1>
       <p className="text-lg text-muted-foreground">
-      Here are some of my projects. Check out my github for more project info.
-        </p>
+        Here are some of my projects. Check out my GitHub for more project info.
+      </p>
       <div className="grid gap-6 pt-8 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (
           <Card key={project.id} className="overflow-hidden">
             <div className="aspect-video relative">
               <img
-                src={project.image}
+                src={project.image || "/placeholder-image.jpg"}
                 alt={project.title}
                 className="object-cover w-full h-full"
               />

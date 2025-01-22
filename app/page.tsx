@@ -6,7 +6,7 @@ import { ArrowRight, Github, Instagram, Linkedin } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getFirestore, collection, getDocs } from "firebase/firestore";
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -17,43 +17,66 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+// Initialize Firebase if not already initialized
+if (!getApps().length) {
+  initializeApp(firebaseConfig);
+}
+const db = getFirestore();
+
+// Define types for posts and projects
+interface Post {
+  id: string;
+  title: string;
+  excerpt: string;
+  date?: string;
+  link?: string;
+}
+
+interface Project {
+  id: string;
+  title: string;
+  description: string;
+}
 
 export default function Home() {
-  const [posts, setPosts] = useState([]);
-  const [projects, setProjects] = useState([]);
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      const postsSnapshot = await getDocs(collection(db, "posts"));
-      const postsData = postsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      try {
+        const postsSnapshot = await getDocs(collection(db, "posts"));
+        const postsData = postsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Post[];
 
-      const projectsSnapshot = await getDocs(collection(db, "projects"));
-      const projectsData = projectsSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+        const projectsSnapshot = await getDocs(collection(db, "projects"));
+        const projectsData = projectsSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })) as Project[];
 
-      setPosts(postsData.slice(0, 2)); // Limit to 2 blogs
-      setProjects(projectsData.slice(0, 3)); // Limit to 3 projects
+        setPosts(postsData.slice(0, 2)); // Limit to 2 blogs
+        setProjects(projectsData.slice(0, 3)); // Limit to 3 projects
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     };
 
     fetchData();
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center" style={{ margin: 2 }}>
-      <section className="space-y-8 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32">
-        <div className="container flex max-w-[64rem] flex-col items-center gap-6 text-center">
+    <div className="flex flex-col items-center justify-center space-y-16">
+      {/* Hero Section */}
+      <section className="space-y-8 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32 text-center">
+        <div className="container max-w-[64rem] space-y-6">
           <h1 className="font-heading text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
             Hi, I'm <span className="text-primary"><div className="err">R Kiran Kumar Reddy</div></span>
           </h1>
-          <p className="max-w-[42rem] leading-relaxed text-muted-foreground sm:text-xl sm:leading-8">
-            I'm a <b>Generative-AI</b> developer passionate about building <b>AI Agents</b> and Realtime AI applications.
+          <p className="max-w-[42rem] mx-auto text-muted-foreground sm:text-xl sm:leading-8">
+            I'm a <b>Generative-AI</b> developer passionate about building <b>AI Agents</b> and real-time AI applications. 
             I am interested in doing <b>AI Research</b>. This site contains my Blog posts and Projects.
           </p>
           <div className="space-x-4">
@@ -64,21 +87,21 @@ export default function Home() {
               <Link href="/blog">Read Blog</Link>
             </Button>
           </div>
-          <div className="flex gap-6">
-            <Link href="https://github.com/RKiranKumarReddy010" target="_blank" rel="noreferrer" style={{ color: "red" }}>
-              <Button variant="ghost" size="icon" className="h-12 w-12">
+          <div className="flex gap-6 justify-center">
+            <Link href="https://github.com/RKiranKumarReddy010" target="_blank" rel="noreferrer">
+              <Button variant="ghost" size="icon" className="h-12 w-12" style={{color:"red"}}>
                 <Github className="h-6 w-6" />
                 <span className="sr-only">GitHub</span>
               </Button>
             </Link>
-            <Link href="https://www.instagram.com/kir4n_kum4r_/" target="_blank" rel="noreferrer" style={{ color: "red" }}>
-              <Button variant="ghost" size="icon" className="h-12 w-12">
+            <Link href="https://www.instagram.com/kir4n_kum4r_/" target="_blank" rel="noreferrer">
+              <Button variant="ghost" size="icon" className="h-12 w-12" style={{color:"red"}}>
                 <Instagram className="h-6 w-6" />
                 <span className="sr-only">Instagram</span>
               </Button>
             </Link>
-            <Link href="https://www.linkedin.com/in/r-kiran-kumar-reddy-54400230b/" target="_blank" rel="noreferrer" style={{ color: "red" }}>
-              <Button variant="ghost" size="icon" className="h-12 w-12">
+            <Link href="https://www.linkedin.com/in/r-kiran-kumar-reddy-54400230b/" target="_blank" rel="noreferrer">
+              <Button variant="ghost" size="icon" className="h-12 w-12" style={{color:"red"}}>
                 <Linkedin className="h-6 w-6" />
                 <span className="sr-only">LinkedIn</span>
               </Button>
@@ -87,23 +110,15 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Projects Section */}
       <section className="container space-y-8 py-8 md:py-12 lg:py-24 bg-muted/50">
-        <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-          <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-5xl font-bold">
-            Featured Projects
-          </h2>
-          <p className="max-w-[85%] leading-relaxed text-muted-foreground sm:text-lg">
-            Here are some of my recent projects. Check out my projects page for more.
-          </p>
-        </div>
-        <div className="mx-auto grid justify-center gap-6 sm:grid-cols-2 md:max-w-[64rem] md:grid-cols-3">
+        <h2 className="text-3xl md:text-5xl font-bold text-center">Featured Projects</h2>
+        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3">
           {projects.map((project) => (
-            <Card key={project.id} className="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow">
-              <div>
-                <h3 className="font-heading text-xl font-semibold">{project.title}</h3>
-                <p className="mt-2 text-muted-foreground">{project.description}</p>
-              </div>
-              <Button variant="ghost" className="mt-6" asChild>
+            <Card key={project.id} className="p-6 hover:shadow-lg transition-shadow">
+              <h3 className="font-heading text-xl font-semibold">{project.title}</h3>
+              <p className="mt-2 text-muted-foreground">{project.description}</p>
+              <Button variant="ghost" className="mt-4" asChild>
                 <Link href={`/projects/${project.id}`}>
                   Learn more <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -113,26 +128,18 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Blog Section */}
       <section className="container space-y-8 py-8 md:py-12 lg:py-24">
-        <div className="mx-auto flex max-w-[58rem] flex-col items-center space-y-4 text-center">
-          <h2 className="font-heading text-3xl leading-[1.1] sm:text-3xl md:text-5xl font-bold">
-            Latest Blog Posts
-          </h2>
-          <p className="max-w-[85%] leading-relaxed text-muted-foreground sm:text-lg">
-            Thoughts on development, design, and technology.
-          </p>
-        </div>
-        <div className="mx-auto grid justify-center gap-6 sm:grid-cols-2 md:max-w-[64rem]">
+        <h2 className="text-3xl md:text-5xl font-bold text-center">Latest Blog Posts</h2>
+        <div className="grid gap-6 sm:grid-cols-2">
           {posts.map((post) => (
-            <Card key={post.id} className="flex flex-col justify-between p-6 hover:shadow-lg transition-shadow">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(post.date).toLocaleDateString()}
-                </p>
-                <h3 className="font-heading text-xl mt-2 font-semibold">{post.title}</h3>
-                <p className="mt-2 text-muted-foreground">{post.excerpt}</p>
-              </div>
-              <Button variant="ghost" className="mt-6" asChild>
+            <Card key={post.id} className="p-6 hover:shadow-lg transition-shadow">
+              <p className="text-sm text-muted-foreground">
+                {post.date ? new Date(post.date).toLocaleDateString() : "No date available"}
+              </p>
+              <h3 className="font-heading text-xl mt-2 font-semibold">{post.title}</h3>
+              <p className="mt-2 text-muted-foreground">{post.excerpt}</p>
+              <Button variant="ghost" className="mt-4" asChild>
                 <Link href={post.link || `/blog/${post.id}`}>
                   Read more <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
