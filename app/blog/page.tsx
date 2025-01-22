@@ -1,4 +1,4 @@
-"use client";
+"use client"
 
 import { Card } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
@@ -19,13 +19,24 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+interface Post {
+  id: string;
+  title: string;
+  date: string;
+  excerpt: string;
+  link?: string;
+}
+
 export default function BlogPage() {
-  const [posts, setPosts] = useState([]);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   useEffect(() => {
     const fetchPosts = async () => {
       const querySnapshot = await getDocs(collection(db, "posts"));
-      const postsData = querySnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+      const postsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as Post[];
       setPosts(postsData);
     };
 
