@@ -112,7 +112,10 @@ export default function Home() {
 
       {/* Projects Section */}
       <section className="container space-y-8 py-8 md:py-12 lg:py-24 bg-muted/50">
-        <h2 className="text-3xl md:text-5xl font-bold text-center">Featured Projects</h2>
+        <h2 className="text-3xl md:text-5xl font-bold text-center" style={{margin:5}}>Featured Projects</h2>
+        <p className="text-lg text-muted-foreground" style={{textAlign:"center", margin:5}}>
+        Here are some of my projects. Check out my GitHub for more project info.
+        </p>
         <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3" style={{margin:5}}>
           {projects.map((project) => (
             <Card key={project.id} className="p-6 hover:shadow-lg transition-shadow">
@@ -130,7 +133,10 @@ export default function Home() {
 
       {/* Blog Section */}
       <section className="container space-y-8 py-8 md:py-12 lg:py-24" >
-        <h2 className="text-3xl md:text-5xl font-bold text-center">Latest Blog Posts</h2>
+        <h2 className="text-3xl md:text-5xl font-bold text-center" >Latest Blog Posts</h2>
+        <p className="text-lg text-muted-foreground" style={{textAlign:"center", margin:5}}>
+          Thoughts, ideas, and insights about web development and technology.
+        </p>
         <div className="grid gap-6 sm:grid-cols-2" style={{margin:5}}>
           {posts.map((post) => (
             <Card key={post.id} className="p-6 hover:shadow-lg transition-shadow">
