@@ -68,7 +68,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center space-y-16">
+    <div className="flex flex-col items-center justify-center space-y-16" style={{padding:10}}>
       {/* Hero Section */}
       <section className="space-y-8 pb-8 pt-6 md:pb-12 md:pt-10 lg:py-32 text-center">
         <div className="container max-w-[64rem] space-y-6">

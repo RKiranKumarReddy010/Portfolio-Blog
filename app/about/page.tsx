@@ -33,7 +33,7 @@ export default function AboutPage() {
               contributing to open-source projects, or exploring new technologies.
             </p>
             <Button className="mt-6">
-              <Download className="mr-2 h-4 w-4" /> Download Resume
+              <Download className="mr-2 h-4 w-4" href="R Kiran KUMAR REDDY.pdf"/><a href="R Kiran KUMAR REDDY.pdf" download >Download Resume</a>
             </Button>
           </div>
         </div>
