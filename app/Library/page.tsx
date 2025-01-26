@@ -6,7 +6,7 @@ import { initializeApp, getApps } from "firebase/app";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Input } from "@/components/ui/input";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -36,6 +36,8 @@ interface ResearchItem {
 
 export default function ResearchPage() {
   const [researchItems, setResearchItems] = useState<ResearchItem[]>([]);
+  const [filteredItems, setFilteredItems] = useState<ResearchItem[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,6 +49,7 @@ export default function ResearchPage() {
           ...doc.data(),
         })) as ResearchItem[];
         setResearchItems(researchData);
+        setFilteredItems(researchData); // Initialize filtered items
       } catch (error) {
         console.error("Error fetching research items:", error);
       } finally {
@@ -57,6 +60,22 @@ export default function ResearchPage() {
     fetchResearchItems();
   }, []);
 
+  useEffect(() => {
+    const filtered = researchItems.filter((item) =>
+      [item.title, item.description, item.authors.join(", ")]
+        .join(" ")
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase())
+    );
+    setFilteredItems(filtered);
+  }, [searchQuery, researchItems]);
+
+  const highlightText = (text: string) => {
+    if (!searchQuery) return text;
+    const regex = new RegExp(`(${searchQuery})`, "gi");
+    return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
+  };
+
   if (loading) return <p>Loading research items...</p>;
 
   return (
@@ -65,15 +84,38 @@ export default function ResearchPage() {
       <p className="text-lg text-muted-foreground">
         A collection of my research papers and books. Explore and learn more.
       </p>
+
+      <Input
+        placeholder="Search by title, author, or description..."
+        value={searchQuery}
+        onChange={(e) => setSearchQuery(e.target.value)}
+        className="mt-4 mb-6"
+      />
+
       <div className="grid gap-6 pt-8 md:grid-cols-2 lg:grid-cols-3">
-        {researchItems.map((item) => (
+        {filteredItems.map((item) => (
           <Card key={item.id} className="overflow-hidden">
             <div className="p-6">
-              <h2 className="font-heading text-xl">{item.title}</h2>
-              <p className="mt-2 text-muted-foreground">{item.description}</p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                <strong>Authors:</strong> {item.authors.join(", ")}
-              </p>
+              <h2
+                className="font-heading text-xl"
+                dangerouslySetInnerHTML={{
+                  __html: highlightText(item.title),
+                }}
+              />
+              <p
+                className="mt-2 text-muted-foreground"
+                dangerouslySetInnerHTML={{
+                  __html: highlightText(item.description),
+                }}
+              />
+              <p
+                className="mt-2 text-sm text-muted-foreground"
+                dangerouslySetInnerHTML={{
+                  __html: `<strong>Authors:</strong> ${highlightText(
+                    item.authors.join(", ")
+                  )}`,
+                }}
+              />
               <p className="text-sm text-muted-foreground">
                 <strong>Year:</strong> {item.year}
               </p>
@@ -86,7 +128,9 @@ export default function ResearchPage() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center mt-4 text-sm font-medium text-primary hover:underline"
+                  style={{margin:10}}
                 >
+                
                   Read More <ArrowRight className="ml-1 h-4 w-4" />
                 </a>
               )}
@@ -94,6 +138,12 @@ export default function ResearchPage() {
           </Card>
         ))}
       </div>
+
+      {filteredItems.length === 0 && (
+        <p className="text-muted-foreground mt-4">
+          No research items match your search query.
+        </p>
+      )}
     </div>
   );
 }
